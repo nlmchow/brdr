@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>HKMA BRDR Search Project</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="AI-powered search over HKMA Banking Research and Data Repository (BRDR) documents up to July 2025." />
+<style>
+/* Base reset and typography */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+margin: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+line-height: 1.6;
+color: #0e1a29;
+background: #f7f9fc;
+}
+:root {
+  --primary: #0b5be0;
+  --primary-ink: #073d99;
+  --bg: #ffffff;
+  --text: #0e1a29;
+  --muted: #5b6b81;
+  --border: #d9e1ea;
+  --card: #ffffff;
+  --shadow: 0 8px 24px rgba(6, 24, 44, 0.08);
+  --radius: 14px;
+  --radius-sm: 10px;
+}
+
+/* Layout */
+.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(180%) blur(8px);
+}
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+}
+.brand {
+  display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text);
+}
+.brand-logo {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: linear-gradient(135deg, #0b5be0 0%, #11a19b 100%);
+  box-shadow: var(--shadow);
+}
+.brand-title { font-weight: 700; font-size: 18px; letter-spacing: 0.2px; }
+
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.link:hover { text-decoration: underline; }
+
+/* Hero */
+.hero {
+  background: radial-gradient(1200px 400px at 10% 0%, rgba(11, 91, 224, 0.07) 0%, rgba(17, 161, 155, 0.07) 60%, transparent 100%),
+              linear-gradient(to bottom, #f7f9fc, #f8fbff 40%, #f7f9fc 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero-inner { padding: 56px 0 32px; }
+.hero h1 {
+  margin: 0 0 12px;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.hero p {
+  margin: 0 0 24px;
+  font-size: 16px; color: var(--muted);
+  max-width: 760px;
+}
+
+/* Search bar (triggers the widget) */
+.search-wrap { display: flex; align-items: center; gap: 12px; }
+.search {
+  width: 100%;
+  max-width: 720px;
+  display: flex; align-items: center;
+  gap: 10px; padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.search:focus-within { border-color: #a9c2ff; box-shadow: 0 8px 24px rgba(11, 91, 224, 0.12); }
+.search input {
+  border: none; outline: none; width: 100%;
+  font-size: 16px; background: transparent; color: var(--text);
+}
+.search .btn {
+  background: var(--primary);
+  color: #fff; border: none; border-radius: 999px;
+  padding: 10px 16px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(11, 91, 224, 0.25);
+}
+.search .btn:hover { background: var(--primary-ink); }
+
+/* Sections */
+section { padding: 40px 0; }
+h2 {
+  font-size: 22px; margin: 0 0 12px;
+  font-weight: 800; color: var(--text);
+}
+.section-desc { margin: 0 0 16px; color: var(--muted); }
+
+/* Cards */
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.card {
+  grid-column: span 12;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 18px;
+}
+@media (min-width: 768px) {
+  .card--third { grid-column: span 4; }
+  .card--half { grid-column: span 6; }
+}
+.card h3 { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.card p { margin: 0; color: var(--muted); }
+.card ul { margin: 10px 0 0 18px; color: var(--text); }
+.card li { margin-bottom: 6px; }
+
+/* List and chips */
+.bullets { margin: 8px 0 0 18px; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 9px; border: 1px solid var(--border);
+  background: #fff; color: var(--text); font-weight: 600; box-shadow: var(--shadow);
+  position: relative;
+}
+.chip svg { width: 16px; height: 16px; color: var(--primary); }
+.copy-btn {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  border-radius: 4px; margin-left: 4px; opacity: 0.7;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+.copy-btn:hover { opacity: 1; background-color: rgba(11, 91, 224, 0.1); }
+.copy-btn svg { width: 14px; height: 14px; color: var(--primary); }
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.footer-inner { padding: 22px 0; color: var(--muted); font-size: 14px; }
+.footer-links { display: flex; gap: 12px; flex-wrap: wrap; }
+.footer-links a { color: var(--primary); text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
+
+/* Accessibility helpers */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+</style>
+</head>
+<body>
+<header>
+<div class="container nav">
+<a class="brand" href="#" aria-label="HKMA BRDR Search Project">
+<span class="brand-logo" aria-hidden="true"></span>
+<span class="brand-title">HKMA BRDR Search Project</span>
+</a>
+<div class="nav-actions">
+<a class="link" href="https://brdr.hkma.gov.hk/eng/main" target="_blank" rel="noopener">HKMA BRDR</a>
+</div>
+</div>
+</header>
+
+<main>
+<section class="hero">
+<div class="container hero-inner">
+<h1>Search HKMA Regulatory Documents with AI</h1>
+<p>
+An AI-powered search experience over Hong Kong Monetary Authority (HKMA) Banking Research and Data Repository (BRDR),
+covering approximately 1,555 documents up to July 2025. Quickly locate Basel guidance, capital and liquidity standards,
+circulars, disclosure templates, and supervisory policies.
+</p>
+
+<div class="search-wrap">
+      <div class="search" role="search">
+
+<!-- Widget JavaScript bundle -->
+<script src="https://cloud.google.com/ai/gen-app-builder/client?hl=en_US"></script>
+
+<!-- Search widget element (opens when the input with id 'searchWidgetTrigger' is focused or clicked) -->
+<gen-search-widget
+configId="9e5cc1bf-2caa-4f89-b8e5-980b1cbcdd20"
+triggerId="searchWidgetTrigger"
+anchorsTarget="_blank"
+>
+</gen-search-widget>
+        
+<!-- Element that opens the widget on click. It does not have to be an input -->
+<input placeholder="Search here" id="searchWidgetTrigger" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container grid">
+    <div class="card card--half">
+      <h3>Scope and Coverage</h3>
+      <p class="section-desc">Snapshot of the corpus and focus areas.</p>
+      <ul class="bullets">
+        <li>Corpus size: approximately 1,555 documents (PDF and DOCX only. DOC excluded)</li>
+        <li>Source: <a href="https://brdr.hkma.gov.hk/eng/main" target="_blank" rel="noopener">HKMA BRDR</a></li>
+        <li>Timeframe: documents available up to July 2025</li>
+        <li>Focus areas include Basel III (final reforms), capital adequacy and disclosure, liquidity (LCR/NSFR), stress testing, and supervisory guidance across Pillars 1–3</li>
+      </ul>
+    </div>
+
+    <div class="card card--half">
+      <h3>What You Can Do</h3>
+      <p class="section-desc">Find the right passage, faster.</p>
+      <ul class="bullets">
+        <li>Search HKMA regulatory texts in natural language</li>
+        <li>Jump to key definitions, calculations, and tables</li>
+        <li>Discover related documents and refine queries quickly</li>
+      </ul>
+    </div>
+
+    <div class="card card--third">
+      <h3>Example Questions</h3>
+      <div class="chip-wrap" aria-label="Example questions" id="questionsContainer">
+      </div>
+    </div>
+    <div class="card card--third">
+      <h3>How It Works</h3>
+      <p>Powered by the Google Cloud Vertex AI Search. Click the search bar above, enter your question, and browse the most relevant HKMA BRDR documents.</p>
+      <p style="margin-top:8px;">For authoritative guidance, always refer to the source documents on the HKMA BRDR website.</p>
+    </div>
+
+    <div class="card card--third">
+      <h3>Tips for Better Results</h3>
+      <ul class="bullets">
+        <li>Be specific: include section names, circular IDs, or exact terms</li>
+        <li>Use natural phrases (e.g., “NSFR calculation for retail banks”)</li>
+        <li>Add details (dates, thresholds) if results feel broad</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+<div class="container footer-inner">
+<div class="footer-links">
+<span>Last updated: July 2025 snapshot</span>
+<span>•</span>
+<a href="https://brdr.hkma.gov.hk/eng/main" target="_blank" rel="noopener">Source: HKMA BRDR</a>
+</div>
+</div>
+</footer>
+<script>
+const questions = [
+  'How does HKMA treat Additional Tier 1 and Tier 2 instrument eligibility?',
+  'What are HKMA Domestic Systemically Important Bank (D‑SIB) surcharge requirements?',
+  'What is the current countercyclical capital buffer (CCyB) rate for Hong Kong and recent changes?',
+  'How does the capital conservation buffer operate and what are distribution constraints?',
+  'Which exposures and parameters are used under SA‑CCR for derivatives EAD?',
+  'What are market risk requirements (FRTB) under standardized and internal models approaches?',
+  'What are CVA capital requirements and applicable hedging exemptions?',
+  'How is the leverage ratio calculated and disclosed in Hong Kong?',
+  'What are HKMA IRRBB expectations and required metrics (EaR and EVE)?',
+  'What are operational risk capital requirements under the standardized measurement approach (SMA)?',
+  'How does HKMA implement Pillar 2 (ICAAP) and the Supervisory Review Process (SREP)?',
+  'Which Pillar 3 disclosure templates and frequencies apply under HKMA rules?',
+  'What qualifies as HQLA (Level 1, 2A, 2B) for LCR in Hong Kong?',
+  'What NSFR requirements apply to Category 1 institutions and what are key ASF/RSF factors?',
+  'What is the Liquidity Maintenance Ratio (LMR) and who must maintain it?',
+  'What are large exposure limits and key exemptions under HKMA rules?',
+  'How are connected party exposures defined and monitored in Hong Kong?',
+  'How are securitization exposures risk‑weighted under Basel III in Hong Kong?',
+  'Which standardized risk weights apply to unrated corporates and retail exposures?',
+  'What deductions from CET1 apply (DTAs, significant investments, goodwill)?',
+  'How is minority interest recognized in regulatory capital consolidation?',
+  'What are Pillar 3 qualitative disclosure expectations (risk management, governance, remuneration)?',
+  'What climate risk management and disclosure guidance has HKMA issued for banks?',
+  'What are HKMA expectations for stress testing design, frequency, and reporting?',
+  'How does HKMA define the Classified Loan Ratio (CLR) and related thresholds?',
+  'What are disclosure timelines and audit requirements under the Banking (Disclosure) Rules?',
+  'Which MA(BS) returns cover capital adequacy, liquidity, and large exposures reporting?',
+  'What are intraday liquidity monitoring and reporting requirements in Hong Kong?',
+  'How are off‑balance sheet items converted to credit equivalents under standardized approach?',
+  'What are IRB constraints and transitional arrangements under Basel III final reforms?',
+  'What are margin requirements for non‑centrally cleared derivatives applicable to banks in Hong Kong?',
+  'How are FX and commodities risk capital charges calculated under market risk rules?',
+  'What are HKMA expectations for model risk management and validation (including IRB/FRTB models)?',
+  'What are disclosure requirements for credit risk mitigation (CRM) techniques and collateral?',
+  'Which exposures are subject to the counterparty credit risk default fund contribution capital charge?',
+  'What are HKMA expectations for recovery and resolution planning under FIRO?',
+  'How are covered bonds treated for HQLA eligibility and large exposures limits?',
+  'What are Pillar 3 requirements for IFRS 9 ECL disclosure and staging information?',
+  'Which supervisory policy manual (SPM) modules govern liquidity risk management and LCR/NSFR?',
+  'What are disclosure requirements and timelines for remuneration under HKMA guidance?',
+  'How are credit risk mitigation haircuts applied to financial collateral and guarantees?',
+  'What are HKMA expectations for board oversight and risk governance (Pillar 2)?',
+  'Which disclosures are required for RWA movement analysis and model updates under Pillar 3?',
+  'How does HKMA treat exposures to sovereigns, public sector entities, and MDBs under standardized approach?',
+  'What are the reporting and disclosure requirements for leverage ratio buffers (if applicable)?',
+  'Which disclosure items are mandatory for LCR and NSFR quantitative templates?',
+  'What are HKMA expectations for intragroup exposures and ring‑fencing in resolution planning?'
+];
+
+
+
+function copyToClipboard(text, button) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (button && button.getBoundingClientRect) {
+      const rect = button.getBoundingClientRect();
+      const notification = document.createElement('div');
+      notification.textContent = 'Copied!';
+      notification.style.cssText = `position:fixed;left:${rect.right + 10}px;top:${rect.top}px;background:#0b5be0;color:white;padding:4px 8px;border-radius:4px;z-index:1000;font-size:12px;`;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 1500);
+    }
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('questionsContainer');
+  questions.forEach(question => {
+    const span = document.createElement('span');
+    span.className = 'chip';
+    span.setAttribute('role', 'button');
+    span.setAttribute('tabindex', '0');
+    span.setAttribute('aria-label', question);
+    span.innerHTML = `
+    ${question}
+    <button class="copy-btn" onclick="copyToClipboard('${question}', this)" title="Copy question">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M8 4v12a2 2 0 002 2h8a2 2 0 002-2V7.242a2 2 0 00-.602-1.43L16.083 2.57A2 2 0 0014.685 2H10a2 2 0 00-2 2z" stroke="currentColor" stroke-width="2"/>
+        <path d="M16 18v2a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>`;
+    container.appendChild(span);
+  });
+});
+</script>
+</body>
+</html>

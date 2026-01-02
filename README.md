@@ -77,6 +77,12 @@ docs/
 * Access to HKMA BRDR public content
 * GitHub
 
+## ⚠️ Constraints and Limitations
+
+- **Vertex AI Search does not support `.doc` file ingestion**  
+  The HKMA BRDR dataset in this repository contains approximately **22 files** in `.doc` format.  
+  These files **cannot be indexed** directly in Vertex AI Search.
+  
 ## 🔒 Notes
 
 * This is a vanilla deployment for quick setup — security and tuning are needed for production use.

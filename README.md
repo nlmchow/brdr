@@ -66,8 +66,10 @@ Integrating them can significantly improve search accuracy and user experience.
 
 ## 📂 Repository Structure
 
+```
 docs/
 └── index.html # Basic web UI to access Vertex AI Search
+```
 
 ## ⚙️ Requirements
 
